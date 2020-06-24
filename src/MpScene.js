@@ -37,6 +37,7 @@ class MpScene extends Phaser.Scene {
     this.socket = io();
 
     this.socket.on(PLAYER_JOIN_EVENT, this.addPlayer.bind(this));
+    this.socket.on(PLAYER_SYNC_EVENT, this.syncPlayers.bind(this));
     this.socket.on(PLAYER_UPDATE_EVENT, this.updatePlayer.bind(this));
     this.socket.on(PLAYER_SHOOT_EVENT, this.playerShoot.bind(this));
 
@@ -75,6 +76,10 @@ class MpScene extends Phaser.Scene {
     playerData.totalXp = this.localPlayer.totalXp;
     playerData.level = this.localPlayer.level;
     this.socket.emit(PLAYER_JOIN_EVENT, playerData);
+  }
+
+  syncPlayers (playerDataArray) {
+    console.log(JSON.stringify(playerDataArray));
   }
 
   addPlayer (id, playerData) {
