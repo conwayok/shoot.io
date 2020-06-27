@@ -141,6 +141,7 @@ class MpScene extends Phaser.Scene {
     this.socket.on(HEART_CONSUME_EVENT, this.removeHeart.bind(this));
     this.socket.on(XP_SPAWN_EVENT, this.spawnXpMultiple.bind(this));
     this.socket.on(XP_CONSUME_EVENT, this.removeXp.bind(this));
+    this.socket.on(XP_SPAWN_STATIC_EVENT, this.spawnXpStatic.bind(this));
   }
 
   // syncPlayers (players) {
@@ -225,6 +226,19 @@ class MpScene extends Phaser.Scene {
     let xp = new XpConsumable(this, x, y, target, id, range);
     this.xpConsumables.add(xp);
     xp.run();
+  }
+
+  spawnXpStatic (xps) {
+    for (const [xpId, xpData] of Object.entries(xps)) {
+      let xp = new XpConsumable(
+        this,
+        xpData.x,
+        xpData.y,
+        { x: xpData.x, y: xpData.y },
+        xpId,
+        null);
+      this.xpConsumables.add(xp);
+    }
   }
 
   removeXp (xpId) {

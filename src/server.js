@@ -25,6 +25,8 @@ const HEART_SPAWN_EVENT = 'HEART_SPAWN';
 const HEART_CONSUME_EVENT = 'HEART_CONSUME';
 const XP_CONSUME_EVENT = 'XP_CONSUME';
 const XP_SPAWN_EVENT = 'XP_SPAWN';
+const XP_SPAWN_STATIC_EVENT = 'XP_SPAWN_STATIC';
+const XP_SET_POS_EVENT = 'XP_SET_POS';
 
 const HEARTS = {};
 const XPS = {};
@@ -51,6 +53,14 @@ io.on('connection', function (socket) {
       for (const [heartId, heartPos] of Object.entries(HEARTS)) {
         socket.emit(HEART_SPAWN_EVENT, heartId, heartPos);
       }
+
+      // sync xp
+      let xps = {};
+      for (const [xpId, xpData] of Object.entries(XPS)) {
+        if (xpData.hasOwnProperty('stopX') && xpData.hasOwnProperty('stopY'))
+          xps[xpId] = { x: xpData.stopX, y: xpData.stopY };
+      }
+      socket.emit(XP_SPAWN_STATIC_EVENT, xps);
 
       // socket.emit(PLAYER_SYNC_EVENT, PLAYERS);
       socket.broadcast.emit(PLAYER_JOIN_EVENT, uid, player);
@@ -103,6 +113,11 @@ io.on('connection', function (socket) {
     socket.broadcast.emit(XP_CONSUME_EVENT, xpId);
   });
 
+  socket.on(XP_SET_POS_EVENT, function (xpId, pos) {
+    XPS[xpId].stopX = pos.x;
+    XPS[xpId].stopY = pos.y;
+  });
+
   socket.on('disconnect', function () {
     console.log('user ' + uid + ' disconnected');
     // removePlayer(uid);
@@ -133,12 +148,14 @@ function spawnXp (spawnX, spawnY, amount) {
   for (let i = 0; i < amount; ++i) {
     let xpId = getRandomId();
     let randomFlyTarget = getRandomPos(0, 0, 1280, 720);
-    xps[xpId] = {
+    let xpData = {
       x: spawnX,
       y: spawnY,
       target: randomFlyTarget,
       range: getRandomInt(50, 150)
     };
+    xps[xpId] = xpData;
+    XPS[xpId] = xpData;
   }
   io.emit(XP_SPAWN_EVENT, xps);
 }

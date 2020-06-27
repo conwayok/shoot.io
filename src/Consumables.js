@@ -56,14 +56,22 @@ class XpConsumable extends Phaser.Physics.Arcade.Sprite {
 
   preUpdate () {
     let travelDistance = calcDistance(this.startX, this.startY, this.x, this.y);
-    if (this.y < 20 ||
-      this.y > config.height ||
-      this.x < 20 ||
-      this.x > config.width || travelDistance > this.range) {
+    if ((this.y < 20 ||
+        this.y > config.height ||
+        this.x < 20 ||
+        this.x > config.width ||
+        travelDistance > this.range
+      ) &&
+      this.xSpeed !== 0 &&
+      this.ySpeed !== 0) {
       this.xSpeed = 0;
       this.ySpeed = 0;
       this.setVelocityY(this.ySpeed);
       this.setVelocityX(this.xSpeed);
+      this.scene.socket.emit(
+        XP_SET_POS_EVENT,
+        this.id,
+        { x: this.x, y: this.y });
     }
   }
 
