@@ -13,13 +13,12 @@ server.listen(8081, function () {
   console.log(`Listening on ${server.address().port}`);
 });
 
-let PLAYERS = [];
-const PLAYER_KEY_DOWN_EVENT = 'PLAYER_KEY_DOWN';
-const PLAYER_KEY_UP_EVENT = 'PLAYER_KEY_UP';
+const PLAYERS = {};
 const PLAYER_JOIN_EVENT = 'PLAYER_JOIN';
 const PLAYER_DISCONNECT_EVENT = 'PLAYER_DISCONNECT';
 const PLAYER_UPDATE_EVENT = 'PLAYER_UPDATE';
 const PLAYER_SYNC_EVENT = 'PLAYER_SYNC';
+const PLAYER_SHOOT_EVENT = 'PLAYER_SHOOT';
 
 io.on('connection', function (socket) {
 
@@ -27,38 +26,41 @@ io.on('connection', function (socket) {
 
   console.log('user' + uid + ' connected');
 
-  socket.on(PLAYER_KEY_DOWN_EVENT, function (k) {
-    console.log(uid, k);
-    socket.broadcast.emit(PLAYER_KEY_DOWN_EVENT, uid, k);
+  socket.on(PLAYER_JOIN_EVENT, function (player) {
+    console.log('player join ' + JSON.stringify(player));
+    console.log('PLAYERS' + JSON.stringify(PLAYERS));
+
+    // only sync if is not first player
+    if (Object.keys(PLAYERS).length > 0 && PLAYERS.constructor === Object) {
+      socket.emit(PLAYER_SYNC_EVENT, PLAYERS);
+      socket.broadcast.emit(PLAYER_JOIN_EVENT, uid, player);
+    }
+
+    PLAYERS[uid] = player;
+    console.log();
   });
 
   socket.on(PLAYER_UPDATE_EVENT, function (data) {
-    console.log(uid + ' ' + JSON.stringify(data));
     socket.broadcast.emit(PLAYER_UPDATE_EVENT, uid, data);
+
+    let player = PLAYERS[uid];
+
+    if (data.hasOwnProperty('x')) player.x = data.x;
+    if (data.hasOwnProperty('y')) player.y = data.y;
+    if (data.hasOwnProperty('rotation')) player.rotation = data.rotation;
+
+    // todo: update player data in PLAYERS variable
   });
 
-  // socket.on(PLAYER_KEY_UP_EVENT, function (k) {
-  //   console.log(uid, k);
-  //   socket.broadcast.emit(PLAYER_KEY_UP_EVENT, uid, k);
-  // });
-
-  socket.on(PLAYER_JOIN_EVENT, function (player) {
-    console.log('player join ' + JSON.stringify(player));
-    socket.emit(PLAYER_SYNC_EVENT, PLAYERS);
-    player.id = uid;
-    PLAYERS.push(player);
-    socket.broadcast.emit(PLAYER_JOIN_EVENT, uid, player);
+  socket.on(PLAYER_SHOOT_EVENT, function (target) {
+    socket.broadcast.emit(PLAYER_SHOOT_EVENT, uid, target);
   });
 
   socket.on('disconnect', function () {
     console.log('user ' + uid + ' disconnected');
-
+    // removePlayer(uid);
+    delete PLAYERS[uid];
+    console.log(JSON.stringify(PLAYERS));
     socket.broadcast.emit(PLAYER_DISCONNECT_EVENT, uid);
   });
 });
-
-function removePlayer (uid) {
-  PLAYERS = PLAYERS.filter(function (v, i, a) {
-    return v.id !== uid;
-  });
-}

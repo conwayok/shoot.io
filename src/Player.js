@@ -51,6 +51,13 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     this.nameText.text = this.name + ' lvl ' + this.level;
   }
 
+  destroyWhole () {
+    this.updateName();
+    this.healthBar.bar.destroy();
+    this.destroy();
+    this.nameText.destroy();
+  }
+
   spawn (spawnX, spawnY) {
     this.hp = this.defaultHp;
     this.isDead = false;
@@ -132,13 +139,15 @@ class HumanPlayer extends Player {
     super(scene, spawnX, spawnY, texture, nameStr);
     this.xpBar = new XpBar(scene, this);
     this.prevFireTime = 0;
+    this.secondsPerShot = 0.5;
   }
 
   //</editor-fold>
 
   shoot (target) {
+    // console.log(this.name + ' shoot ' + JSON.stringify(target));
     if (this.getNextAvailableFireTime() <= Date.now()) {
-      let bullet = this.createBullet(target);
+      let bullet = super.createBullet(target);
       this.scene.bullets.add(bullet);
       bullet.run();
       this.prevFireTime = Date.now();
@@ -196,4 +205,8 @@ class HumanPlayer extends Player {
         this.upgradesAvailable[2].getDesc();
     }
   }
+}
+
+class LocalPlayer extends Player {
+
 }
