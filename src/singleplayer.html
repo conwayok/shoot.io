@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title></title>
+  <script src="lib/phaser.min.js"></script>
+  <script src="lib/rexbbcodetextplugin.min.js"></script>
+  <script src="client/objects/Bullet.js"></script>
+  <script src="client/utils/ProjectUtils.js"></script>
+  <script src="client/scenes/MainScene.js"></script>
+  <script src="client/objects/Player.js"></script>
+  <script src="client/objects/LeaderBoard.js"></script>
+  <script src="client/objects/Consumables.js"></script>
+  <script src="client/objects/Upgrades.js"></script>
+  <script src="client/objects/HealthBar.js"></script>
+  <script src="client/objects/XpBar.js"></script>
+  <script src="client/objects/GameFeed.js"></script>
+  <script src="client/utils/Spawner.js"></script>
+  <style type="text/css">
+    body {
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+  const config = {
+    type: Phaser.AUTO,
+    width: 1280,
+    height: 720,
+    physics: {
+      default: 'arcade',
+      arcade: {
+        gravity: { y: 0 },
+        debug: false
+      }
+    },
+    scene: MainScene
+  };
+
+  const game = new Phaser.Game(config);
+</script>
+
+</body>
+</html>
