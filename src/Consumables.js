@@ -16,12 +16,14 @@ class Heart extends Phaser.Physics.Arcade.Sprite {
 }
 
 class XpConsumable extends Phaser.Physics.Arcade.Sprite {
-  constructor (scene, spawnX, spawnY, target) {
+  constructor (scene, spawnX, spawnY, target, xpId, range) {
     super(scene, spawnX, spawnY, 'xp');
     this.scale = 0.5;
     scene.add.existing(this);
     scene.physics.add.existing(this);
     this.scene = scene;
+
+    this.id = xpId;
 
     this.startX = spawnX;
     this.startY = spawnY;
@@ -32,7 +34,7 @@ class XpConsumable extends Phaser.Physics.Arcade.Sprite {
 
     let speed = 1000;
 
-    this.range = getRandomInt(50, 150);
+    this.range = range;
 
     // Calculate X and y velocity of bullet to move it from shooter to target
     if (target.y >= this.y) {
@@ -44,10 +46,12 @@ class XpConsumable extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
-  static overlapPlayer (xp, player) {
+  static playerOverlapXp (player, xp) {
     player.xp += 1;
     player.totalXp += 1;
+    let id = xp.id;
     xp.destroy();
+    this.socket.emit(XP_CONSUME_EVENT, id);
   }
 
   preUpdate () {

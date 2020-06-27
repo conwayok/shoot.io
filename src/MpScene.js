@@ -48,6 +48,7 @@ class MpScene extends Phaser.Scene {
     this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
     this.mouse = this.input.mousePointer;
     this.keyR = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+    this.input.keyboard.on('keydown', this.keydownCallback, this);
 
     let randomSpawnPos = getRandomPos(
       100,
@@ -75,7 +76,7 @@ class MpScene extends Phaser.Scene {
       Bullet.bulletHitPlayer
     );
 
-    this.physics.add.overlap(
+    this.heartOverlap = this.physics.add.overlap(
       this.localPlayer,
       this.hearts,
       Heart.playerOverlapHeart,
@@ -83,7 +84,13 @@ class MpScene extends Phaser.Scene {
       this
     );
 
-    // todo: xp consumables overlap
+    this.xpOverlap = this.physics.add.overlap(
+      this.localPlayer,
+      this.xpConsumables,
+      XpConsumable.playerOverlapXp,
+      null,
+      this
+    );
 
     this.upgradeText = this.add.text(
       config.width / 2,
@@ -106,23 +113,34 @@ class MpScene extends Phaser.Scene {
     this.gameFeed = new GameFeed(this);
   }
 
-  removeHeart (heartId) {
-    this.hearts.children.each(function (heart) {
-      if (heart.id === heartId)
-        heart.destroy();
-    });
+  keydownCallback (event) {
+    switch (event.key) {
+      case '1':
+        this.localPlayer.levelUp(1);
+        break;
+      case '2':
+        this.localPlayer.levelUp(2);
+        break;
+      case '3':
+        this.localPlayer.levelUp(3);
+        break;
+      default:
+        break;
+    }
   }
 
   bindEvents () {
     this.socket.on(PLAYER_JOIN_EVENT, this.addPlayer.bind(this));
-    this.socket.on(PLAYER_SYNC_EVENT, this.syncPlayers.bind(this));
+    // this.socket.on(PLAYER_SYNC_EVENT, this.syncPlayers.bind(this));
     this.socket.on(PLAYER_UPDATE_EVENT, this.updatePlayer.bind(this));
     this.socket.on(PLAYER_SHOOT_EVENT, this.playerShoot.bind(this));
     this.socket.on(PLAYER_DISCONNECT_EVENT, this.playerDisconnect.bind(this));
     this.socket.on(PLAYER_DIE_EVENT, this.playerDie.bind(this));
     this.socket.on(PLAYER_SPAWN_EVENT, this.playerSpawn.bind(this));
-    this.socket.on(HEART_SPAWN_EVENT, this.heartSpawn.bind(this));
+    this.socket.on(HEART_SPAWN_EVENT, this.spawnHeart.bind(this));
     this.socket.on(HEART_CONSUME_EVENT, this.removeHeart.bind(this));
+    this.socket.on(XP_SPAWN_EVENT, this.spawnXpMultiple.bind(this));
+    this.socket.on(XP_CONSUME_EVENT, this.removeXp.bind(this));
   }
 
   // syncPlayers (players) {
@@ -152,14 +170,15 @@ class MpScene extends Phaser.Scene {
   updatePlayer (id, playerData) {
     let player = PLAYERS_MAP.get(id);
     if (player !== undefined) {
-      player.x = playerData.x;
-      player.y = playerData.y;
-      player.rotation = playerData.rotation;
-      player.hp = playerData.hp;
-      player.xp = playerData.xp;
-      player.totalXp = playerData.totalXp;
-      player.level = playerData.level;
-      player.bulletType = playerData.bulletType;
+      if (playerData.hasOwnProperty('x')) player.x = playerData.x;
+      if (playerData.hasOwnProperty('y')) player.y = playerData.y;
+      if (playerData.hasOwnProperty('rotation')) player.rotation = playerData.rotation;
+      if (playerData.hasOwnProperty('hp')) player.hp = playerData.hp;
+      if (playerData.hasOwnProperty('xp')) player.xp = playerData.xp;
+      if (playerData.hasOwnProperty('totalXp')) player.totalXp = playerData.totalXp;
+      if (playerData.hasOwnProperty('level')) player.level = playerData.level;
+      if (playerData.hasOwnProperty('bulletType')) player.bulletType = playerData.bulletType;
+      if (playerData.hasOwnProperty('scale')) player.scale = playerData.scale;
     }
   }
 
@@ -185,10 +204,34 @@ class MpScene extends Phaser.Scene {
     player.spawn(pos.x, pos.y);
   }
 
-  heartSpawn (id, pos) {
-    let heart = new Heart(this, pos.x, pos.y);
-    heart.id = id;
+  spawnHeart (id, pos) {
+    let heart = new Heart(this, pos.x, pos.y, id);
     this.hearts.add(heart);
+  }
+
+  removeHeart (heartId) {
+    this.hearts.children.each(function (heart) {
+      if (heart.id === heartId)
+        heart.destroy();
+    });
+  }
+
+  spawnXpMultiple (xps) {
+    for (const [xpId, xpData] of Object.entries(xps))
+      this.spawnXp(xpId, xpData.x, xpData.y, xpData.target, xpData.range);
+  }
+
+  spawnXp (id, x, y, target, range) {
+    let xp = new XpConsumable(this, x, y, target, id, range);
+    this.xpConsumables.add(xp);
+    xp.run();
+  }
+
+  removeXp (xpId) {
+    this.xpConsumables.children.each(function (xp) {
+      if (xp.id === xpId)
+        xp.destroy();
+    });
   }
 
   update () {

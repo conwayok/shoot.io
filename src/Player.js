@@ -71,17 +71,6 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     this.xp = 1;
     this.level = 1;
     this.requiredLevelUpXp = this.level * this.additionalXpRequiredPerLevel;
-
-    // for (let i = 0; i < this.xp; ++i) {
-    //   let xpConsumable = new XpConsumable(
-    //     this.scene,
-    //     this.x,
-    //     this.y,
-    //     getRandomPos(0, 0, config.width, config.height)
-    //   );
-    //   this.scene.xpConsumables.add(xpConsumable);
-    //   xpConsumable.run();
-    // }
   }
 
   update () {
@@ -160,7 +149,32 @@ class LocalPlayer extends Player {
     let randomX = getRandomInt(32, config.width - 32);
     let randomY = getRandomInt(32, config.height - 32);
     super.spawn(randomX, randomY);
+    this.scene.xpOverlap.active = true;
+    this.scene.heartOverlap.active = true;
     this.scene.socket.emit(PLAYER_SPAWN_EVENT, { x: randomX, y: randomY });
+  }
+
+  checkLevelUp () {
+    if (this.xp >= this.requiredLevelUpXp) {
+      this.xp = 0;
+      this.level += 1;
+      this.requiredLevelUpXp = this.level * this.additionalXpRequiredPerLevel;
+      this.upgradesAvailable.push(...getThreeRandomUpgrades());
+    }
+  }
+
+  levelUp (option) {
+    // can only upgrade if upgrades available
+    if (this.upgradesAvailable.length > 0) {
+      // get chosen upgrade from array
+      let upgrade = this.upgradesAvailable[option - 1];
+      // and apply to user
+      upgrade.applyTo(this);
+      // pop 3 elements out (users have to choose one from three upgrades at a time)
+      for (let i = 0; i < 3; ++i) {
+        this.upgradesAvailable.shift();
+      }
+    }
   }
 
   update () {
@@ -168,6 +182,7 @@ class LocalPlayer extends Player {
     // 更新升級技能字串
     this.updateUpgradeText();
     this.xpBar.draw();
+    this.checkLevelUp();
   }
 
   die () {
@@ -175,7 +190,10 @@ class LocalPlayer extends Player {
     if (this.isDead) {
       this.xp = 1;
       this.level = 1;
+      this.totalXp = 1;
       this.requiredLevelUpXp = this.level * this.additionalXpRequiredPerLevel;
+      this.scene.xpOverlap.active = false;
+      this.scene.heartOverlap.active = false;
 
       // if i died, i will tell server
       this.scene.socket.emit(PLAYER_DIE_EVENT);
