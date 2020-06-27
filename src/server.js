@@ -95,6 +95,7 @@ io.on('connection', function (socket) {
 
   socket.on(PLAYER_DIE_EVENT, function () {
     let player = PLAYERS[uid];
+    player.isDead = true;
     spawnXp(player.x, player.y, player.totalXp);
     socket.broadcast.emit(PLAYER_DIE_EVENT, uid);
   });

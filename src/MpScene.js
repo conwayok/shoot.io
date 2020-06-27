@@ -159,12 +159,16 @@ class MpScene extends Phaser.Scene {
       'player',
       playerData.name);
     newPlayer.isDead = playerData.isDead;
+
     newPlayer.bulletType = playerData.bulletType;
     newPlayer.totalXp = playerData.totalXp;
     newPlayer.level = playerData.level;
-    this.players.add(newPlayer);
+
+    // sync death state
+    if (newPlayer.isDead) newPlayer.die();
+    else this.players.add(newPlayer);
+
     PLAYERS_MAP.set(id, newPlayer);
-    // console.log(PLAYERS_MAP);
     newPlayer.setCollideWorldBounds(true);
   }
 
@@ -297,13 +301,16 @@ class MpScene extends Phaser.Scene {
     localPlayerData.x = this.localPlayer.x;
     localPlayerData.y = this.localPlayer.y;
     localPlayerData.rotation = this.localPlayer.rotation;
+
     // stat data
+    localPlayerData.scale = this.localPlayer.scale;
     localPlayerData.hp = this.localPlayer.hp;
     localPlayerData.xp = this.localPlayer.xp;
     localPlayerData.totalXp = this.localPlayer.totalXp;
     localPlayerData.level = this.localPlayer.level;
     localPlayerData.bulletType = this.localPlayer.bulletType;
     localPlayerData.name = this.localPlayer.name;
+    localPlayerData.isDead = this.localPlayer.isDead;
     return localPlayerData;
   }
 
