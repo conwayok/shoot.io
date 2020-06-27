@@ -7,7 +7,7 @@ class MpScene extends Phaser.Scene {
 
   //<editor-fold defualtstate="collapsed" desc="preload">
   preload () {
-    let assetsPath = 'client/assets/';
+    let assetsPath = 'assets/';
 
     // 載入素材
     this.load.image('bg', assetsPath + 'whitebg.png');

@@ -3,10 +3,10 @@ const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io').listen(server);
 
-app.use(express.static(__dirname));
+app.use(express.static(__dirname + '/client'));
 
 app.get('/', function (req, res) {
-  res.sendFile(__dirname + '/mp.html');
+  res.sendFile(__dirname + '/client/mp.html');
 });
 
 server.listen(8081, function () {
@@ -17,7 +17,6 @@ const PLAYERS = {};
 const PLAYER_JOIN_EVENT = 'PLAYER_JOIN';
 const PLAYER_DISCONNECT_EVENT = 'PLAYER_DISCONNECT';
 const PLAYER_UPDATE_EVENT = 'PLAYER_UPDATE';
-const PLAYER_SYNC_EVENT = 'PLAYER_SYNC';
 const PLAYER_SHOOT_EVENT = 'PLAYER_SHOOT';
 const PLAYER_DIE_EVENT = 'PLAYER_DIE';
 const PLAYER_SPAWN_EVENT = 'PLAYER_SPAWN';
@@ -196,4 +195,4 @@ function getRandomId () {
   // Convert it to base 36 (numbers + letters), and grab the first 9 characters
   // after the decimal.
   return '_' + Math.random().toString(36).substr(2, 9);
-};
+}
