@@ -1,5 +1,3 @@
-// todo: Player is a player with no restrictions (if shoot() is called, then will shoot, regardless of fire rate)
-
 class Player extends Phaser.Physics.Arcade.Sprite {
 
   //<editor-fold defaultstate="collapsed" desc="constructor">
@@ -51,20 +49,11 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     this.nameText.text = this.name + ' lvl ' + this.level;
   }
 
-  destroyWhole () {
-    this.updateName();
-    this.healthBar.bar.destroy();
-    this.destroy();
-    this.nameText.destroy();
-  }
-
   spawn (spawnX, spawnY) {
-    this.hp = this.defaultHp;
+    this.hp = PLAYER_DEFAULT_HP;
     this.isDead = false;
     this.clearTint();
-    let randomX = getRandomInt(32, config.width - 32);
-    let randomY = getRandomInt(32, config.height - 32);
-    this.body.reset(randomX, randomY);
+    this.body.reset(spawnX, spawnY);
     this.scene.players.add(this);
     this.body.setCollideWorldBounds(true);
   }
@@ -123,7 +112,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
   takeDamage (bullet) {
     if (!this.godMode) {
+      console.log(this.name + 'takeDamage');
       this.hp -= bullet.damage;
+      this.healthBar.draw();
       if (this.hp <= 0) {
         this.scene.gameFeed.messages.push(getKillMessage(bullet.shooter, this));
         this.die();
@@ -132,7 +123,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
   }
 }
 
-class HumanPlayer extends Player {
+class LocalPlayer extends Player {
 
   //<editor-fold defaultstate="collapsed" desc="constructor">
   constructor (scene, spawnX, spawnY, texture, nameStr) {
@@ -140,12 +131,16 @@ class HumanPlayer extends Player {
     this.xpBar = new XpBar(scene, this);
     this.prevFireTime = 0;
     this.secondsPerShot = 0.5;
+    this.nameText.setStyle({
+      color: '#0024ff',
+      fontStyle: 'Bold',
+      fontSize: 15
+    });
   }
 
   //</editor-fold>
 
   shoot (target) {
-    // console.log(this.name + ' shoot ' + JSON.stringify(target));
     if (this.getNextAvailableFireTime() <= Date.now()) {
       let bullet = super.createBullet(target);
       this.scene.bullets.add(bullet);
@@ -162,14 +157,10 @@ class HumanPlayer extends Player {
   }
 
   respawn () {
-    this.hp = this.defaultHp;
-    this.isDead = false;
-    this.clearTint();
     let randomX = getRandomInt(32, config.width - 32);
     let randomY = getRandomInt(32, config.height - 32);
-    this.body.reset(randomX, randomY);
-    this.scene.players.add(this);
-    this.body.setCollideWorldBounds(true);
+    super.spawn(randomX, randomY);
+    this.scene.socket.emit(PLAYER_SPAWN_EVENT, { x: randomX, y: randomY });
   }
 
   update () {
@@ -182,6 +173,10 @@ class HumanPlayer extends Player {
   die () {
     super.die();
     if (this.isDead) {
+      this.xp = 1;
+      this.level = 1;
+      this.requiredLevelUpXp = this.level * this.additionalXpRequiredPerLevel;
+
       // if i died, i will tell server
       this.scene.socket.emit(PLAYER_DIE_EVENT);
     }
@@ -207,6 +202,15 @@ class HumanPlayer extends Player {
   }
 }
 
-class LocalPlayer extends Player {
+class RemotePlayer extends Player {
+  constructor (scene, spawnX, spawnY, texture, nameStr) {
+    super(scene, spawnX, spawnY, texture, nameStr);
+  }
 
+  destroyWhole () {
+    super.updateName();
+    this.healthBar.bar.destroy();
+    this.destroy();
+    this.nameText.destroy();
+  }
 }

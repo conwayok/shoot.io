@@ -41,11 +41,6 @@ class Bullet extends Phaser.Physics.Arcade.Sprite {
     // 穿透式子彈打到人會直接穿過去
     if (bullet.type !== BULLET_TYPE.PENETRATION)
       bullet.destroy();
-
-    // if bullet kills target
-    if (player.hp <= 0) {
-      shooter.kills += 1;
-    }
   }
 
   preUpdate () {
