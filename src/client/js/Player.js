@@ -330,8 +330,8 @@ class LocalAIPlayer extends LocalPlayer {
   update () {
     // ai specific behavior
     if (!this.isDead) {
-      this.healthBar.draw();
-      this.updateName();
+      // this.healthBar.draw();
+      // this.updateName();
 
       // randomly move
       this.move();
