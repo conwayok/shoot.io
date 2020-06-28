@@ -7,7 +7,7 @@ class MpScene extends Phaser.Scene {
 
   //<editor-fold defualtstate="collapsed" desc="preload">
   preload () {
-    let assetsPath = 'client/assets/';
+    let assetsPath = 'assets/';
 
     // 載入素材
     this.load.image('bg', assetsPath + 'whitebg.png');
@@ -131,7 +131,6 @@ class MpScene extends Phaser.Scene {
 
   bindEvents () {
     this.socket.on(PLAYER_JOIN_EVENT, this.addPlayer.bind(this));
-    // this.socket.on(PLAYER_SYNC_EVENT, this.syncPlayers.bind(this));
     this.socket.on(PLAYER_UPDATE_EVENT, this.updatePlayer.bind(this));
     this.socket.on(PLAYER_SHOOT_EVENT, this.playerShoot.bind(this));
     this.socket.on(PLAYER_DISCONNECT_EVENT, this.playerDisconnect.bind(this));
@@ -144,14 +143,8 @@ class MpScene extends Phaser.Scene {
     this.socket.on(XP_SPAWN_STATIC_EVENT, this.spawnXpStatic.bind(this));
   }
 
-  // syncPlayers (players) {
-  //   console.log('syncPlayers ' + JSON.stringify(players));
-  //   for (const [k, v] of Object.entries(players))
-  //     this.addPlayer(k, v);
-  // }
-
   addPlayer (id, playerData) {
-    console.log('new player ' + playerData.name + ' added');
+    console.log('player ' + playerData.name + ' added');
     let newPlayer = new RemotePlayer(
       this,
       playerData.x,
@@ -160,9 +153,11 @@ class MpScene extends Phaser.Scene {
       playerData.name);
     newPlayer.isDead = playerData.isDead;
 
+    newPlayer.hp = playerData.hp;
     newPlayer.bulletType = playerData.bulletType;
     newPlayer.totalXp = playerData.totalXp;
     newPlayer.level = playerData.level;
+    newPlayer.scale = playerData.scale;
 
     // sync death state
     if (newPlayer.isDead) newPlayer.die();
@@ -287,9 +282,17 @@ class MpScene extends Phaser.Scene {
     });
 
     // update this player's state to other people
+    let localPlayerData = {
+      x: this.localPlayer.x,
+      y: this.localPlayer.y,
+      rotation: this.localPlayer.rotation,
+      hp: this.localPlayer.hp,
+      totalXp: this.localPlayer.totalXp
+    };
+
     this.socket.emit(
       PLAYER_UPDATE_EVENT,
-      this.getLocalPlayerData());
+      localPlayerData);
 
     this.leaderBoard.update();
     this.gameFeed.update();

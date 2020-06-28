@@ -42,6 +42,9 @@ class WideBulletUpgrade extends Upgrade {
 
   applyTo (user) {
     user.bulletType = BULLET_TYPE.WIDE;
+    user.scene.socket.emit(
+      PLAYER_UPDATE_EVENT,
+      { bulletType: user.bulletType });
   }
 }
 
@@ -53,11 +56,13 @@ class PenetrationBulletUpgrade extends Upgrade {
 
   applyTo (user) {
     user.bulletType = BULLET_TYPE.PENETRATION;
+    user.scene.socket.emit(
+      PLAYER_UPDATE_EVENT,
+      { bulletType: user.bulletType });
   }
 }
 
 class SpeedUpgrade extends Upgrade {
-  static desc = '血量乘二';
 
   getDesc () {
     return '移動速度+20%';
