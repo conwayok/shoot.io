@@ -12,6 +12,7 @@ class LeaderBoard {
       }
     );
     this.textObj.depth = 99;
+    this.textObj.setScrollFactor(0);
     scene.add.existing(this.textObj);
     this.scene = scene;
   }

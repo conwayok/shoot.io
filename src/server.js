@@ -69,6 +69,7 @@ io.on('connection', function (socket) {
       // socket.emit(PLAYER_SYNC_EVENT, PLAYERS);
       socket.broadcast.emit(PLAYER_JOIN_EVENT, uid, player);
 
+    } else {
       // start random heart spawning
       startSpawnHeart();
     }
@@ -106,6 +107,7 @@ io.on('connection', function (socket) {
   });
 
   socket.on(PLAYER_SPAWN_EVENT, function (pos) {
+    PLAYERS[uid].isDead = false;
     socket.broadcast.emit(PLAYER_SPAWN_EVENT, uid, pos);
   });
 
@@ -120,8 +122,11 @@ io.on('connection', function (socket) {
   });
 
   socket.on(XP_SET_POS_EVENT, function (xpId, pos) {
-    XPS[xpId].stopX = pos.x;
-    XPS[xpId].stopY = pos.y;
+    let xp = XPS[xpId];
+    if (xp !== undefined) {
+      xp.stopX = pos.x;
+      xp.stopY = pos.y;
+    }
   });
 
   socket.on('disconnect', function () {

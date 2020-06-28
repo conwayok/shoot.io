@@ -7,6 +7,8 @@ class XpBar {
     this.startX = config.width / 2 - this.barWidth / 2;
     this.startY = 30;
     this.bar = new Phaser.GameObjects.Graphics(scene);
+    this.bar.setScrollFactor(0);
+
     this.bar.depth = 99;
     scene.add.existing(this.bar);
     this.verticalPadding = 2;
