@@ -1,5 +1,3 @@
-const PLAYERS_MAP = new Map();
-
 class MpScene extends Phaser.Scene {
   constructor () {
     super();
@@ -10,16 +8,15 @@ class MpScene extends Phaser.Scene {
     let assetsPath = 'assets/';
 
     // 載入素材
-    this.load.image('bg', assetsPath + 'whitebg.png');
-    this.load.image('player', assetsPath + 'green_block.png');
-    this.load.image('bullet', assetsPath + 'bullet.png');
+    this.load.image('bg', assetsPath + 'backgrounddetailed1.png');
+    this.load.image('player', assetsPath + 'tank.png');
+    this.load.image('bullet', assetsPath + 'bullet14.png');
     this.load.image('wide_bullet', assetsPath + 'wide_bullet.png');
     this.load.image('bullet', assetsPath + 'wide_bullet.png');
     this.load.image(
       'penetration_bullet',
       assetsPath + 'penetration_bullet.png'
     );
-    this.load.image('enemy', assetsPath + 'blue_square.png');
     this.load.image('heart', assetsPath + 'heart.png');
     this.load.image('xp', assetsPath + 'xp.png');
     this.load.text('names', assetsPath + 'first-names.txt');
@@ -40,7 +37,8 @@ class MpScene extends Phaser.Scene {
 
     this.bindEvents();
 
-    this.add.image(640, 360, 'bg');
+    let bg = this.add.image(640, 360, 'bg');
+    // bg.scale = 8;
 
     this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
     this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
@@ -67,8 +65,8 @@ class MpScene extends Phaser.Scene {
     this.socket.emit(PLAYER_JOIN_EVENT, localPlayerData);
 
     // this.camera = new Phaser.Cameras.Scene2D.Camera(0, 0, 640, 360);
-    // this.cameras.main.startFollow(this.localPlayer);
-    // this.cameras.main.setSize(640, 360);
+    this.cameras.main.startFollow(this.localPlayer);
+    this.cameras.main.setSize(1280, 720);
 
     this.bullets = this.physics.add.group();
     this.hearts = this.physics.add.group();
@@ -111,6 +109,7 @@ class MpScene extends Phaser.Scene {
       }
     );
     this.upgradeText.originX = 0.5;
+    this.upgradeText.setScrollFactor(0);
     this.upgradeText.depth = 99;
 
     this.leaderBoard = new LeaderBoard(this);
@@ -265,7 +264,10 @@ class MpScene extends Phaser.Scene {
 
       // fire
       if (this.mouse.isDown) {
-        this.localPlayer.shoot({ x: this.mouse.x, y: this.mouse.y });
+        this.localPlayer.shoot({
+          x: this.mouse.x + this.cameras.main.scrollX,
+          y: this.mouse.y + this.cameras.main.scrollY
+        });
       }
 
       // localPlayer will rotate according to mouse
@@ -273,8 +275,8 @@ class MpScene extends Phaser.Scene {
         Phaser.Math.Angle.Between(
           this.localPlayer.x,
           this.localPlayer.y,
-          this.mouse.x,
-          this.mouse.y));
+          this.mouse.x + this.cameras.main.scrollX,
+          this.mouse.y + this.cameras.main.scrollY));
     } else {
       if (this.keyR.isDown) {
         this.localPlayer.respawn();

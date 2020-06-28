@@ -20,6 +20,7 @@ class GameFeed {
       true
     );
     this.feed.depth = 99;
+    this.feed.setScrollFactor(0);
     scene.add.existing(this.feed);
   }
 
