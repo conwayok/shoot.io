@@ -8,7 +8,7 @@ class Heart extends Phaser.Physics.Arcade.Sprite {
   }
 
   static playerOverlapHeart (player, heart) {
-    player.hp += 1;
+    player.hp += 2;
     let id = heart.id;
     heart.destroy();
     this.socket.emit(HEART_CONSUME_EVENT, id);

@@ -9,25 +9,25 @@ class Upgrade {
   }
 }
 
-class HpPow2Upgrade extends Upgrade {
+class TripleHpUpgrade extends Upgrade {
 
   getDesc () {
-    return '血量平方';
+    return '血量乘3';
   }
 
   applyTo (user) {
-    user.hp = Math.pow(user.hp, 2);
+    user.hp *= 3;
   }
 }
 
 class ShrinkSelfUpgrade extends Upgrade {
 
   getDesc () {
-    return '縮小20%';
+    return '縮小60%';
   }
 
   applyTo (user) {
-    user.scale *= 0.8;
+    user.scale *= 0.6;
     user.scene.socket.emit(PLAYER_UPDATE_EVENT, { scale: user.scale });
   }
 }
@@ -63,27 +63,27 @@ class PenetrationBulletUpgrade extends Upgrade {
 class SpeedUpgrade extends Upgrade {
 
   getDesc () {
-    return '移動速度+20%';
+    return '移動速度+50%';
   }
 
   applyTo (user) {
-    user.speed *= 1.2;
+    user.speed *= 1.5;
   }
 }
 
 class FireRateUpgrade extends Upgrade {
 
   getDesc () {
-    return '射速+20%';
+    return '射速+50%';
   }
 
   applyTo (user) {
-    user.secondsPerShot *= 0.8;
+    user.secondsPerShot *= 0.5;
   }
 }
 
 let UPGRADES = [
-  new HpPow2Upgrade(),
+  new TripleHpUpgrade(),
   new ShrinkSelfUpgrade(),
   new WideBulletUpgrade(),
   new SpeedUpgrade(),

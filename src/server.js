@@ -18,7 +18,7 @@ server.listen(8081, function () {
   console.log(`Listening on ${server.address().port}`);
 });
 
-const PLAYERS = {};
+let PLAYERS = {};
 const PLAYER_JOIN_EVENT = 'PLAYER_JOIN';
 const PLAYER_DISCONNECT_EVENT = 'PLAYER_DISCONNECT';
 const PLAYER_UPDATE_EVENT = 'PLAYER_UPDATE';
@@ -32,8 +32,8 @@ const XP_SPAWN_EVENT = 'XP_SPAWN';
 const XP_SPAWN_STATIC_EVENT = 'XP_SPAWN_STATIC';
 const XP_SET_POS_EVENT = 'XP_SET_POS';
 
-const HEARTS = {};
-const XPS = {};
+let HEARTS = {};
+let XPS = {};
 
 io.on('connection', function (socket) {
 
@@ -130,14 +130,32 @@ io.on('connection', function (socket) {
     console.log(JSON.stringify(PLAYERS));
     socket.broadcast.emit(PLAYER_DISCONNECT_EVENT, uid);
 
-    if (Object.keys(PLAYERS).length === 0 && PLAYERS.constructor === Object)
-      clearInterval(spawnHeartInterval);
+    if (Object.keys(PLAYERS).length === 0 && PLAYERS.constructor === Object) {
+      resetServer();
+    }
   });
 });
+
+setInterval(serverCleaner, 3000);
+
+function serverCleaner () {
+  if (io.engine.clientsCount === 0)
+    resetServer();
+}
+
+function resetServer () {
+  console.log('resetServer ' + Date.now());
+  // if no players left, clear game state
+  clearInterval(spawnHeartInterval);
+  PLAYERS = {};
+  HEARTS = {};
+  XPS = {};
+}
 
 let spawnHeartInterval = null;
 
 function startSpawnHeart () {
+  console.log('startSpawnHeart');
   spawnHeartInterval = setInterval(spawnHeart, 6000);
 }
 
