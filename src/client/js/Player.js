@@ -68,6 +68,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     // 從玩家群組移除，才不會繼續被射
     this.scene.players.remove(this);
 
+    this.bulletType = BULLET_TYPE.NORMAL;
+
     this.xp = 1;
     this.level = 1;
     this.totalXp = 1;
