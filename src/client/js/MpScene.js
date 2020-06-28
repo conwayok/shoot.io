@@ -282,9 +282,17 @@ class MpScene extends Phaser.Scene {
     });
 
     // update this player's state to other people
+    let localPlayerData = {
+      x: this.localPlayer.x,
+      y: this.localPlayer.y,
+      rotation: this.localPlayer.rotation,
+      hp: this.localPlayer.hp,
+      totalXp: this.localPlayer.totalXp
+    };
+
     this.socket.emit(
       PLAYER_UPDATE_EVENT,
-      this.getLocalPlayerData());
+      localPlayerData);
 
     this.leaderBoard.update();
     this.gameFeed.update();

@@ -79,12 +79,12 @@ io.on('connection', function (socket) {
       if (data.hasOwnProperty('x')) player.x = data.x;
       if (data.hasOwnProperty('y')) player.y = data.y;
       if (data.hasOwnProperty('rotation')) player.rotation = data.rotation;
-
-      player.hp = data.hp;
-      player.xp = data.xp;
-      player.totalXp = data.totalXp;
-      player.level = data.level;
-      player.bulletType = data.bulletType;
+      if (data.hasOwnProperty('hp')) player.hp = data.hp;
+      if (data.hasOwnProperty('xp')) player.xp = data.xp;
+      if (data.hasOwnProperty('totalXp')) player.totalXp = data.totalXp;
+      if (data.hasOwnProperty('level')) player.level = data.level;
+      if (data.hasOwnProperty('bulletType')) player.bulletType = data.bulletType;
+      if (data.hasOwnProperty('scale')) player.scale = data.scale;
     }
     socket.broadcast.emit(PLAYER_UPDATE_EVENT, uid, data);
   });
