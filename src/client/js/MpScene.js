@@ -38,7 +38,6 @@ class MpScene extends Phaser.Scene {
     this.bindEvents();
 
     let bg = this.add.image(640, 360, 'bg');
-    // bg.scale = 8;
 
     this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
     this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
