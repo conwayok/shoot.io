@@ -1,5 +1,3 @@
-// todo: front shield, add shooting direction
-
 class Upgrade {
 
   getDesc () {
@@ -11,14 +9,14 @@ class Upgrade {
   }
 }
 
-class DoubleHpUpgrade extends Upgrade {
+class HpPow2Upgrade extends Upgrade {
 
   getDesc () {
-    return '血量乘二';
+    return '血量平方';
   }
 
   applyTo (user) {
-    user.hp *= 2;
+    user.hp = Math.pow(user.hp, 2);
   }
 }
 
@@ -85,7 +83,7 @@ class FireRateUpgrade extends Upgrade {
 }
 
 let UPGRADES = [
-  new DoubleHpUpgrade(),
+  new HpPow2Upgrade(),
   new ShrinkSelfUpgrade(),
   new WideBulletUpgrade(),
   new SpeedUpgrade(),
