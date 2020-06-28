@@ -23,7 +23,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     // array of upgrades available to the player
     this.upgradesAvailable = [];
     this.level = 1;
-    this.additionalXpRequiredPerLevel = 5;
+    this.additionalXpRequiredPerLevel = 2;
     this.requiredLevelUpXp = this.level * this.additionalXpRequiredPerLevel;
 
     this.nameText = new Phaser.GameObjects.Text(scene, this.x,
@@ -153,6 +153,11 @@ class LocalPlayer extends Player {
     super.spawn(randomX, randomY);
     this.scene.xpOverlap.active = true;
     this.scene.heartOverlap.active = true;
+    this.bulletType = BULLET_TYPE.NORMAL;
+    this.xp = 1;
+    this.level = 1;
+    this.totalXp = 1;
+    this.requiredLevelUpXp = this.level * this.additionalXpRequiredPerLevel;
     this.scene.socket.emit(PLAYER_SPAWN_EVENT, { x: randomX, y: randomY });
   }
 
@@ -325,6 +330,15 @@ class LocalAIPlayer extends LocalPlayer {
         });
       }
     }
+  }
+
+  shoot (target) {
+    // change direction to face target
+    this.setRotation(
+      Phaser.Math.Angle.Between(this.x, this.y,
+        target.x, target.y
+      ));
+    super.shoot(target);
   }
 
   update () {

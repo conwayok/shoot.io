@@ -63,7 +63,12 @@ class WideBullet extends Bullet {
   constructor (scene, shooter, target) {
     super(scene, shooter, target, 'wide_bullet');
     this.type = BULLET_TYPE.WIDE;
-    this.scaleX = 1.5;
+    this.scaleX = 1.2;
+  }
+
+  preUpdate () {
+    super.preUpdate();
+    this.scaleX *= 1.03;
   }
 }
 
