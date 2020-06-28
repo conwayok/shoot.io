@@ -1,6 +1,6 @@
-#shoot.io
+shoot.io
 
-###執行方法：
+執行方法：
 
 1. 安裝[Node.js 10+](https://nodejs.org/dist/latest-v10.x/)
 2. 切到專案根目錄 (shoot.io/)
