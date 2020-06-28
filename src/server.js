@@ -1,9 +1,10 @@
+const path = require('path');
 const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io').listen(server);
 
-app.use(express.static(__dirname + '/client'));
+app.use(express.static(path.join(__dirname, 'client')));
 
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/client/mp.html');
@@ -63,9 +64,9 @@ io.on('connection', function (socket) {
 
       // socket.emit(PLAYER_SYNC_EVENT, PLAYERS);
       socket.broadcast.emit(PLAYER_JOIN_EVENT, uid, player);
-    } else {
+
       // start random heart spawning
-      spawnHeart();
+      startSpawnHeart();
     }
 
     PLAYERS[uid] = player;
@@ -120,15 +121,22 @@ io.on('connection', function (socket) {
 
   socket.on('disconnect', function () {
     console.log('user ' + uid + ' disconnected');
-    // removePlayer(uid);
     delete PLAYERS[uid];
     console.log(JSON.stringify(PLAYERS));
     socket.broadcast.emit(PLAYER_DISCONNECT_EVENT, uid);
+
+    if (Object.keys(PLAYERS).length === 0 && PLAYERS.constructor === Object)
+      clearInterval(spawnHeartInterval);
   });
 });
 
+let spawnHeartInterval = null;
+
+function startSpawnHeart () {
+  spawnHeartInterval = setInterval(spawnHeart, 3000);
+}
+
 function spawnHeart () {
-  console.log('spawnHeart');
   let spawnPos = getRandomPos(
     50,
     50,
@@ -136,11 +144,9 @@ function spawnHeart () {
     670
   );
   let id = getRandomId();
+  console.log('spawnHeart ' + id + ' ' + JSON.stringify(spawnPos));
   HEARTS[id] = spawnPos;
   io.sockets.emit(HEART_SPAWN_EVENT, id, spawnPos);
-  let nextSpawnTime = getRandomInt(1000, 3000);
-  if (Object.keys(PLAYERS).length !== 0 && PLAYERS.constructor === Object)
-    setTimeout(spawnHeart, nextSpawnTime);
 }
 
 function spawnXp (spawnX, spawnY, amount) {
@@ -167,27 +173,10 @@ function getRandomInt (min, max) {
   )) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
-function calcDistance (x1, y1, x2, y2) {
-  return Math.sqrt(
-    Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
-}
-
 function getRandomPos (minX, minY, maxX, maxY) {
   let xPos = getRandomInt(minX, maxX);
   let yPos = getRandomInt(minY, maxY);
   return { x: xPos, y: yPos };
-}
-
-function getRandomElement (array) {
-  return array[Math.floor(Math.random() * array.length)];
-}
-
-function shuffleArray (array) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1
-    ));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
 }
 
 function getRandomId () {

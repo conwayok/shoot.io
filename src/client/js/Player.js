@@ -101,7 +101,6 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
   takeDamage (bullet) {
     if (!this.godMode) {
-      console.log(this.name + 'takeDamage');
       this.hp -= bullet.damage;
       this.healthBar.draw();
       if (this.hp <= 0) {
@@ -119,7 +118,7 @@ class LocalPlayer extends Player {
     super(scene, spawnX, spawnY, texture, nameStr);
     this.xpBar = new XpBar(scene, this);
     this.prevFireTime = 0;
-    this.secondsPerShot = 0.5;
+    this.secondsPerShot = 0.4;
     this.nameText.setStyle({
       color: '#0024ff',
       fontStyle: 'Bold',
