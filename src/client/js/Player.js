@@ -70,6 +70,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 
     this.xp = 1;
     this.level = 1;
+    this.totalXp = 1;
     this.requiredLevelUpXp = this.level * this.additionalXpRequiredPerLevel;
   }
 
@@ -118,7 +119,7 @@ class LocalPlayer extends Player {
     super(scene, spawnX, spawnY, texture, nameStr);
     this.xpBar = new XpBar(scene, this);
     this.prevFireTime = 0;
-    this.secondsPerShot = 0.4;
+    this.secondsPerShot = 0.25;
     this.nameText.setStyle({
       color: '#0024ff',
       fontStyle: 'Bold',
@@ -187,10 +188,6 @@ class LocalPlayer extends Player {
   die () {
     super.die();
     if (this.isDead) {
-      this.xp = 1;
-      this.level = 1;
-      this.totalXp = 1;
-      this.requiredLevelUpXp = this.level * this.additionalXpRequiredPerLevel;
       this.scene.xpOverlap.active = false;
       this.scene.heartOverlap.active = false;
 
@@ -229,5 +226,126 @@ class RemotePlayer extends Player {
     this.healthBar.bar.destroy();
     this.destroy();
     this.nameText.destroy();
+  }
+
+  takeDamage (bullet) {}
+}
+
+class LocalAIPlayer extends LocalPlayer {
+
+  constructor (scene, spawnX, spawnY, texture, nameStr) {
+    super(
+      scene,
+      spawnX,
+      spawnY,
+      texture,
+      nameStr);
+    this.nameText.setStyle({
+      color: '#0024ff',
+      fontStyle: 'Bold',
+      fontSize: 15
+    });
+    this.keys = ['w', 'a', 's', 'd', 'wa', 'wd', 'sa', 'sd'];
+    this.changeDirectionTime = 0;
+    this.sight = 500;
+    this.deathTime = 0;
+
+    // ai players have manually generated random id
+    this.id = getRandomId();
+  }
+
+  move () {
+    let now = Date.now();
+    if (now > this.changeDirectionTime) {
+      this.changeDirection();
+      this.changeDirectionTime = now + getRandomInt(200, 300);
+    }
+
+    this.setVelocityY(this.ySpeed);
+    this.setVelocityX(this.xSpeed);
+  }
+
+  die () {
+    super.die();
+    this.deathTime = Date.now();
+    // console.log(this.deathTime);
+  }
+
+  changeDirection () {
+    let key = this.keys[Math.floor(Math.random() * this.keys.length)];
+    switch (key) {
+      case 'w':
+        this.xSpeed = 0;
+        this.ySpeed = this.speed;
+        break;
+      case 'a':
+        this.xSpeed = -this.speed;
+        this.ySpeed = 0;
+        break;
+      case 's':
+        this.xSpeed = 0;
+        this.ySpeed = -this.speed;
+        break;
+      case 'd':
+        this.xSpeed = this.speed;
+        this.ySpeed = 0;
+        break;
+      case 'wa':
+        this.xSpeed = -this.speed;
+        this.ySpeed = this.speed;
+        break;
+      case 'wd':
+        this.xSpeed = this.speed;
+        this.ySpeed = this.speed;
+        break;
+      case 'sa':
+        this.xSpeed = this.speed;
+        this.ySpeed = -this.speed;
+        break;
+      case 'sd':
+        this.xSpeed = -this.speed;
+        this.ySpeed = -this.speed;
+        break;
+    }
+  }
+
+  // find if any of the enemy players are in range
+  findEnemy () {
+    let childrenArray = this.scene.players.children.entries;
+    for (let i = 0; i < childrenArray.length; ++i) {
+      let player = childrenArray[i];
+      let distance = calcDistance(this.x, this.y, player.x, player.y);
+      // 如果該玩家不是自己且在視線範圍內，射他
+      if (player !== this && distance <= this.sight) {
+        this.shoot({
+          x: player.x + getRandomInt(-50, 50),
+          y: player.y + getRandomInt(-50, 50)
+        });
+      }
+    }
+  }
+
+  update () {
+    // ai specific behavior
+    if (!this.isDead) {
+      this.healthBar.draw();
+      this.updateName();
+
+      // randomly move
+      this.move();
+
+      // randomly find enemies
+      this.findEnemy(this.scene.players);
+
+      this.checkLevelUp();
+
+      // randomly level up
+      if (this.upgradesAvailable.length > 0) {
+        super.levelUp(getRandomInt(1, 4));
+      }
+    } else if ((Date.now() - this.deathTime
+    ) > 3000) {
+      super.respawn();
+    }
   }
 }
