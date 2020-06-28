@@ -1,7 +1,8 @@
 function getRandomInt (min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+  return Math.floor(Math.random() * (max - min
+  )) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
 function calcDistance (x1, y1, x2, y2) {
@@ -21,7 +22,15 @@ function getRandomElement (array) {
 
 function shuffleArray (array) {
   for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(Math.random() * (i + 1
+    ));
     [array[i], array[j]] = [array[j], array[i]];
   }
+}
+
+function getRandomId () {
+  // Math.random should be unique because of its seeding algorithm.
+  // Convert it to base 36 (numbers + letters), and grab the first 9 characters
+  // after the decimal.
+  return '_' + Math.random().toString(36).substr(2, 9);
 }

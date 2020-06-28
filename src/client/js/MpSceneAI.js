@@ -1,6 +1,4 @@
-const PLAYERS_MAP = new Map();
-
-class MpScene extends Phaser.Scene {
+class MpSceneAI extends Phaser.Scene {
   constructor () {
     super();
   }
@@ -42,20 +40,12 @@ class MpScene extends Phaser.Scene {
 
     this.add.image(640, 360, 'bg');
 
-    this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
-    this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
-    this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
-    this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-    this.mouse = this.input.mousePointer;
-    this.keyR = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-    this.input.keyboard.on('keydown', this.keydownCallback, this);
-
     let randomSpawnPos = getRandomPos(
       100,
       100,
       config.width - 100,
       config.height - 100);
-    this.localPlayer = new LocalPlayer(
+    this.localPlayer = new LocalAIPlayer(
       this,
       randomSpawnPos.x,
       randomSpawnPos.y,
@@ -65,10 +55,6 @@ class MpScene extends Phaser.Scene {
     this.localPlayer.setCollideWorldBounds(true);
     let localPlayerData = this.getLocalPlayerData();
     this.socket.emit(PLAYER_JOIN_EVENT, localPlayerData);
-
-    // this.camera = new Phaser.Cameras.Scene2D.Camera(0, 0, 640, 360);
-    // this.cameras.main.startFollow(this.localPlayer);
-    // this.cameras.main.setSize(640, 360);
 
     this.bullets = this.physics.add.group();
     this.hearts = this.physics.add.group();
@@ -117,21 +103,7 @@ class MpScene extends Phaser.Scene {
     this.gameFeed = new GameFeed(this);
   }
 
-  keydownCallback (event) {
-    switch (event.key) {
-      case '1':
-        this.localPlayer.levelUp(1);
-        break;
-      case '2':
-        this.localPlayer.levelUp(2);
-        break;
-      case '3':
-        this.localPlayer.levelUp(3);
-        break;
-      default:
-        break;
-    }
-  }
+  //<editor-fold defualtstate="collapsed" desc="callbacks">
 
   bindEvents () {
     this.socket.on(PLAYER_JOIN_EVENT, this.addPlayer.bind(this));
@@ -172,6 +144,7 @@ class MpScene extends Phaser.Scene {
   }
 
   updatePlayer (id, playerData) {
+    // console.log(id + ' ' + JSON.stringify(playerData));
     let player = PLAYERS_MAP.get(id);
     if (player !== undefined) {
       if (playerData.hasOwnProperty('x')) player.x = playerData.x;
@@ -251,39 +224,17 @@ class MpScene extends Phaser.Scene {
     });
   }
 
+  //</editor-fold>
+
   update () {
-    if (!this.localPlayer.isDead) {
-      // moving
-      if (this.keyW.isDown) this.localPlayer.setVelocityY(-this.localPlayer.speed);
-      if (this.keyS.isDown) this.localPlayer.setVelocityY(this.localPlayer.speed);
-      if (this.keyA.isDown) this.localPlayer.setVelocityX(-this.localPlayer.speed);
-      if (this.keyD.isDown) this.localPlayer.setVelocityX(this.localPlayer.speed);
-
-      // stop
-      if (this.keyW.isUp && this.keyS.isUp) this.localPlayer.setVelocityY(0);
-      if (this.keyA.isUp && this.keyD.isUp) this.localPlayer.setVelocityX(0);
-
-      // fire
-      if (this.mouse.isDown) {
-        this.localPlayer.shoot({ x: this.mouse.x, y: this.mouse.y });
-      }
-
-      // localPlayer will rotate according to mouse
-      this.localPlayer.setRotation(
-        Phaser.Math.Angle.Between(
-          this.localPlayer.x,
-          this.localPlayer.y,
-          this.mouse.x,
-          this.mouse.y));
-    } else {
-      if (this.keyR.isDown) {
-        this.localPlayer.respawn();
-      }
-    }
-
     this.players.children.each(function (player) {
       player.update();
     });
+
+    // for respawn
+    if (this.localPlayer.isDead) {
+      this.localPlayer.update();
+    }
 
     // update this player's state to other people
     let localPlayerData = {
@@ -294,12 +245,13 @@ class MpScene extends Phaser.Scene {
       totalXp: this.localPlayer.totalXp
     };
 
+    // console.log('emit');
     this.socket.emit(
       PLAYER_UPDATE_EVENT,
       localPlayerData);
 
-    this.leaderBoard.update();
-    this.gameFeed.update();
+    // this.leaderBoard.update();
+    // this.gameFeed.update();
   }
 
   getLocalPlayerData () {
@@ -320,5 +272,4 @@ class MpScene extends Phaser.Scene {
     localPlayerData.isDead = this.localPlayer.isDead;
     return localPlayerData;
   }
-
 }

@@ -16,6 +16,7 @@
   <script src="js/Consumables.js"></script>
   <script src="js/Upgrades.js"></script>
   <script src="js/MpScene.js"></script>
+  <script src="js/MpSceneAI.js"></script>
 </head>
 <body>
 
@@ -32,10 +33,10 @@
       }
     },
     fps: {
-      target: 60,
+      target: 30,
       forceSetTimeOut: true
     },
-    scene: MpScene
+    scene: MpSceneAI
   };
   const game = new Phaser.Game(config);
 </script>
