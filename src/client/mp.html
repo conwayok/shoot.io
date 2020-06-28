@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MP</title>
+  <script src="lib/phaser.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/ProjectUtils.js"></script>
+  <script src="js/Bullet.js"></script>
+  <script src="js/Events.js"></script>
+  <script src="js/HealthBar.js"></script>
+  <script src="js/XpBar.js"></script>
+  <script src="js/Player.js"></script>
+  <script src="js/GameFeed.js"></script>
+  <script src="js/LeaderBoard.js"></script>
+  <script src="js/Consumables.js"></script>
+  <script src="js/Upgrades.js"></script>
+  <script src="js/MpScene.js"></script>
+</head>
+<body>
+
+<script>
+  const config = {
+    type: Phaser.AUTO,
+    width: 1280,
+    height: 720,
+    physics: {
+      default: 'arcade',
+      arcade: {
+        gravity: { y: 0 },
+        debug: false
+      }
+    },
+    scene: MpScene
+  };
+  const game = new Phaser.Game(config);
+</script>
+
+</body>
+</html>
