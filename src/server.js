@@ -10,6 +10,10 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/client/mp.html');
 });
 
+app.get('/ai', function (req, res) {
+  res.sendFile(__dirname + '/client/mp_ai.html');
+});
+
 server.listen(8081, function () {
   console.log(`Listening on ${server.address().port}`);
 });
@@ -74,6 +78,7 @@ io.on('connection', function (socket) {
   });
 
   socket.on(PLAYER_UPDATE_EVENT, function (data) {
+    // console.log(JSON.stringify(data));
     let player = PLAYERS[uid];
     if (player !== undefined) {
       if (data.hasOwnProperty('x')) player.x = data.x;
@@ -133,7 +138,7 @@ io.on('connection', function (socket) {
 let spawnHeartInterval = null;
 
 function startSpawnHeart () {
-  spawnHeartInterval = setInterval(spawnHeart, 3000);
+  spawnHeartInterval = setInterval(spawnHeart, 6000);
 }
 
 function spawnHeart () {
