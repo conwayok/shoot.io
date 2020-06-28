@@ -157,6 +157,7 @@ class LocalPlayer extends Player {
     this.xp = 1;
     this.level = 1;
     this.totalXp = 1;
+    this.secondsPerShot = 0.25;
     this.requiredLevelUpXp = this.level * this.additionalXpRequiredPerLevel;
     this.scene.socket.emit(PLAYER_SPAWN_EVENT, { x: randomX, y: randomY });
   }
