@@ -122,13 +122,11 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 class LocalPlayer extends Player {
 
   //<editor-fold defaultstate="collapsed" desc="constructor">
-  constructor (scene, spawnX, spawnY, texture, nameStr, hudScene) {
+  constructor (scene, spawnX, spawnY, texture, nameStr) {
     super(scene, spawnX, spawnY, texture, nameStr);
     this.prevFireTime = 0;
     this.secondsPerShot = 0.25;
     this.rotation = 0;
-    // this.hudScene = hudScene;
-    // this.xpBar = new XpBar(hudScene, this);
     this.nameText.setStyle({
       color: '#0024ff',
       fontStyle: 'Bold',

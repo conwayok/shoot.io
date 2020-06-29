@@ -8,7 +8,7 @@ class MpScene extends Phaser.Scene {
     let assetsPath = 'assets/';
 
     // 載入素材
-    this.load.image('bg', assetsPath + 'backgrounddetailed1.png');
+    this.load.image('bg', assetsPath + '46.png');
     this.load.image('player', assetsPath + 'tank.png');
     this.load.image('bullet', assetsPath + 'bullet14.png');
     this.load.image('wide_bullet', assetsPath + 'wide_bullet.png');
@@ -33,7 +33,7 @@ class MpScene extends Phaser.Scene {
 
     this.bindEvents();
 
-    this.add.image(640, 360, 'bg');
+    this.add.image(1280, 720, 'bg');
 
     this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
     this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
@@ -153,7 +153,6 @@ class MpScene extends Phaser.Scene {
   }
 
   addPlayer (id, playerData) {
-    console.log('player ' + playerData.name + ' added');
     let newPlayer = new RemotePlayer(
       this,
       playerData.x,
@@ -267,9 +266,6 @@ class MpScene extends Phaser.Scene {
   }
 
   update () {
-
-    console.log(this.localPlayer.x + ' ' + this.localPlayer.y);
-
     if (!this.localPlayer.isDead) {
       // moving
       if (this.keyW.isDown) this.localPlayer.setVelocityY(-this.localPlayer.speed);
