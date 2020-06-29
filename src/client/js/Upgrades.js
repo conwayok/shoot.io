@@ -49,7 +49,7 @@ class WideBulletUpgrade extends Upgrade {
 class PenetrationBulletUpgrade extends Upgrade {
 
   getDesc () {
-    return '穿透子彈';
+    return '遠程子彈';
   }
 
   applyTo (user) {
