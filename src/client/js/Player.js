@@ -52,7 +52,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
   spawn (spawnX, spawnY) {
     this.hp = PLAYER_DEFAULT_HP;
     this.isDead = false;
-    this.clearTint();
+    // this.clearTint();
+    this.setTexture('player');
     this.body.reset(spawnX, spawnY);
     this.rotation = 0;
     this.scene.players.add(this);
@@ -63,7 +64,8 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     // 死亡狀態設定為true
     this.isDead = true;
     // 變黑色
-    this.setTint(0xff0000);
+    // this.setTint(0xff0000);
+    this.setTexture('player_dead');
     // 不要動
     this.body.setVelocity(0, 0);
     // 從玩家群組移除，才不會繼續被射

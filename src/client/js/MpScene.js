@@ -20,6 +20,7 @@ class MpScene extends Phaser.Scene {
     this.load.image('heart', assetsPath + 'heart.png');
     this.load.image('xp', assetsPath + 'xp.png');
     this.load.image('reticle', assetsPath + 'reticle.png');
+    this.load.image('player_dead', assetsPath + 'tank_dead.png');
     this.load.text('names', assetsPath + 'first-names.txt');
   }
 
