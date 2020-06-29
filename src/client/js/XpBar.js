@@ -2,8 +2,8 @@ class XpBar {
   constructor (scene, player) {
     this.scene = scene;
     this.player = player;
-    this.barWidth = 450;
-    this.barHeight = 20;
+    this.barWidth = 900;
+    this.barHeight = 40;
     this.startX = config.width / 2 - this.barWidth / 2;
     this.startY = 30;
     this.bar = new Phaser.GameObjects.Graphics(scene);
