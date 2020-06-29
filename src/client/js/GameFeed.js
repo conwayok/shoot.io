@@ -1,27 +1,26 @@
 class GameFeed {
   static TTL = 1500;
 
-  constructor (scene) {
+  constructor (hudScene) {
     this.maxDisplayMessage = 5;
-    this.scene = scene;
     this.messages = [];
     this.feed = new RexPlugins.GameObjects.BBCodeText(
-      scene,
+      hudScene,
       (config.width / 10
       ) * 7.5,
       30,
       '', {
-        fontSize: '20px',
+        fontSize: '40px',
         fontFamily: 'Consolas',
         color: '#000000',
-        // backgroundColor: '#000000',
-        align: 'center'
+        align: 'center',
+        backgroundColor: '#FFFFFF'
       },
       true
     );
     this.feed.depth = 99;
     this.feed.setScrollFactor(0);
-    scene.add.existing(this.feed);
+    hudScene.add.existing(this.feed);
   }
 
   update () {
@@ -60,8 +59,17 @@ class GameFeedMessage {
 }
 
 function getKillMessage (killer, killed) {
-  let text = '[b]' + killer.name + '[/b]' +
-    '[color=red] KILLED [/color]' +
-    '[b]' + killed.name + '[/b]';
+  let text = '[b]' + killer.name + '[color=blue] KILLED [/color]' +
+    killed.name + '[/b]';
+  return new GameFeedMessage(text, Date.now() + GameFeed.TTL);
+}
+
+function getJoinedMessage (name) {
+  let text = '[b]' + name + '[color=green] JOINED[/color][/b]';
+  return new GameFeedMessage(text, Date.now() + GameFeed.TTL);
+}
+
+function getDisconnectedMessage (name) {
+  let text = '[b]' + name + '[color=red] DISCONNECTED[/color][/b]';
   return new GameFeedMessage(text, Date.now() + GameFeed.TTL);
 }

@@ -74,11 +74,11 @@ class SpeedUpgrade extends Upgrade {
 class FireRateUpgrade extends Upgrade {
 
   getDesc () {
-    return '射速+50%';
+    return '射速+40%';
   }
 
   applyTo (user) {
-    user.secondsPerShot *= 0.5;
+    user.secondsPerShot *= 0.6;
   }
 }
 

@@ -18,6 +18,9 @@ server.listen(8081, function () {
   console.log(`Listening on ${server.address().port}`);
 });
 
+const MAP_WIDTH = 1280 * 2;
+const MAP_HEIGHT = 720 * 2;
+
 let PLAYERS = {};
 const PLAYER_JOIN_EVENT = 'PLAYER_JOIN';
 const PLAYER_DISCONNECT_EVENT = 'PLAYER_DISCONNECT';
@@ -31,6 +34,7 @@ const XP_CONSUME_EVENT = 'XP_CONSUME';
 const XP_SPAWN_EVENT = 'XP_SPAWN';
 const XP_SPAWN_STATIC_EVENT = 'XP_SPAWN_STATIC';
 const XP_SET_POS_EVENT = 'XP_SET_POS';
+const KILL_EVENT = 'KILL';
 
 let HEARTS = {};
 let XPS = {};
@@ -129,6 +133,10 @@ io.on('connection', function (socket) {
     }
   });
 
+  socket.on(KILL_EVENT, function (message) {
+    socket.broadcast.emit(KILL_EVENT, message);
+  });
+
   socket.on('disconnect', function () {
     console.log('user ' + uid + ' disconnected');
     delete PLAYERS[uid];
@@ -168,8 +176,8 @@ function spawnHeart () {
   let spawnPos = getRandomPos(
     50,
     50,
-    1230,
-    670
+    MAP_WIDTH - 50,
+    MAP_HEIGHT - 50
   );
   let id = getRandomId();
   console.log('spawnHeart ' + id + ' ' + JSON.stringify(spawnPos));
