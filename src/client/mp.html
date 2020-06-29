@@ -22,8 +22,9 @@
 <body>
 
 <script>
+  // performance config
   const config = {
-    type: Phaser.AUTO,
+    type: Phaser.CANVAS,
     width: 2560,
     height: 1440,
     physics: {
@@ -33,9 +34,13 @@
         debug: false
       }
     },
+    resolution: 1,
     fps: {
       target: 60,
       forceSetTimeOut: true
+    },
+    render: {
+      antialias: false
     },
     scene: [MpScene, HudScene]
   };
