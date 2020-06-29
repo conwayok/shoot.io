@@ -105,9 +105,11 @@ io.on('connection', function (socket) {
 
   socket.on(PLAYER_DIE_EVENT, function () {
     let player = PLAYERS[uid];
-    player.isDead = true;
-    spawnXp(player.x, player.y, player.totalXp);
-    socket.broadcast.emit(PLAYER_DIE_EVENT, uid);
+    if (player !== undefined) {
+      player.isDead = true;
+      spawnXp(player.x, player.y, player.totalXp);
+      socket.broadcast.emit(PLAYER_DIE_EVENT, uid);
+    }
   });
 
   socket.on(PLAYER_SPAWN_EVENT, function (pos) {
@@ -152,7 +154,9 @@ io.on('connection', function (socket) {
 setInterval(serverCleaner, 3000);
 
 function serverCleaner () {
-  if (io.engine.clientsCount === 0)
+  if (io.engine.clientsCount === 0 &&
+    Object.keys(PLAYERS).length > 0 &&
+    PLAYERS.constructor === Object)
     resetServer();
 }
 
