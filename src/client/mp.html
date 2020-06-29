@@ -34,11 +34,14 @@
         debug: false
       }
     },
+    resolution: 1,
     fps: {
       target: 60,
       forceSetTimeOut: true
     },
-    antialias: false,
+    render: {
+      antialias: false
+    },
     scene: [MpScene, HudScene]
   };
   const game = new Phaser.Game(config);
