@@ -54,6 +54,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     this.isDead = false;
     this.clearTint();
     this.body.reset(spawnX, spawnY);
+    this.rotation = 0;
     this.scene.players.add(this);
     this.body.setCollideWorldBounds(true);
   }
@@ -107,7 +108,11 @@ class Player extends Phaser.Physics.Arcade.Sprite {
       this.hp -= bullet.damage;
       this.healthBar.draw();
       if (this.hp <= 0) {
-        this.scene.gameFeed.messages.push(getKillMessage(bullet.shooter, this));
+        let message = getKillMessage(bullet.shooter, this);
+        // local kill feed
+        this.scene.events.emit(GAME_FEED_MESSAGE_EVENT, message);
+        // remote kill feed
+        this.scene.socket.emit(KILL_EVENT, message);
         this.die();
       }
     }
@@ -117,11 +122,13 @@ class Player extends Phaser.Physics.Arcade.Sprite {
 class LocalPlayer extends Player {
 
   //<editor-fold defaultstate="collapsed" desc="constructor">
-  constructor (scene, spawnX, spawnY, texture, nameStr) {
+  constructor (scene, spawnX, spawnY, texture, nameStr, hudScene) {
     super(scene, spawnX, spawnY, texture, nameStr);
-    this.xpBar = new XpBar(scene, this);
     this.prevFireTime = 0;
     this.secondsPerShot = 0.25;
+    this.rotation = 0;
+    // this.hudScene = hudScene;
+    // this.xpBar = new XpBar(hudScene, this);
     this.nameText.setStyle({
       color: '#0024ff',
       fontStyle: 'Bold',
@@ -159,6 +166,7 @@ class LocalPlayer extends Player {
     this.totalXp = 1;
     this.secondsPerShot = 0.25;
     this.requiredLevelUpXp = this.level * this.additionalXpRequiredPerLevel;
+    this.scale = 1;
     this.scene.socket.emit(PLAYER_SPAWN_EVENT, { x: randomX, y: randomY });
   }
 
@@ -188,8 +196,6 @@ class LocalPlayer extends Player {
   update () {
     super.update();
     // 更新升級技能字串
-    this.updateUpgradeText();
-    this.xpBar.draw();
     this.checkLevelUp();
   }
 
@@ -204,24 +210,6 @@ class LocalPlayer extends Player {
     }
   }
 
-  updateUpgradeText () {
-    let upgradesAvailableLength = this.upgradesAvailable.length;
-    if (upgradesAvailableLength === 0 &&
-      this.scene.upgradeText.text.length > 0) {
-      this.scene.upgradeText.text = '';
-
-    } else if (upgradesAvailableLength > 0) {
-      this.scene.upgradeText.text =
-        '可升級 ' + upgradesAvailableLength / 3 +
-        ' 次 ' +
-        '1)' +
-        this.upgradesAvailable[0].getDesc() +
-        ' 2)' +
-        this.upgradesAvailable[1].getDesc() +
-        ' 3)' +
-        this.upgradesAvailable[2].getDesc();
-    }
-  }
 }
 
 class RemotePlayer extends Player {

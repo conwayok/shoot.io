@@ -1,6 +1,6 @@
 class MpScene extends Phaser.Scene {
   constructor () {
-    super();
+    super('MpScene');
   }
 
   //<editor-fold defualtstate="collapsed" desc="preload">
@@ -19,25 +19,21 @@ class MpScene extends Phaser.Scene {
     );
     this.load.image('heart', assetsPath + 'heart.png');
     this.load.image('xp', assetsPath + 'xp.png');
+    this.load.image('reticle', assetsPath + 'reticle.png');
     this.load.text('names', assetsPath + 'first-names.txt');
-
-    this.load.plugin(
-      'rexbbcodetextplugin',
-      'lib/rexbbcodetextplugin.min.js',
-      true
-    );
   }
 
   //</editor-fold>
 
   create () {
+
     this.names = this.cache.text.get('names').split('\r\n');
 
     this.socket = io();
 
     this.bindEvents();
 
-    let bg = this.add.image(640, 360, 'bg');
+    this.add.image(640, 360, 'bg');
 
     this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
     this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
@@ -52,20 +48,31 @@ class MpScene extends Phaser.Scene {
       100,
       config.width - 100,
       config.height - 100);
+
+    this.scene.launch('HudScene');
+
+    let hudScene = this.scene.get('HudScene');
+
     this.localPlayer = new LocalPlayer(
       this,
       randomSpawnPos.x,
       randomSpawnPos.y,
-      'player', getRandomElement(this.names));
+      'player', getRandomElement(this.names), hudScene);
     this.players = this.physics.add.group();
     this.players.add(this.localPlayer);
     this.localPlayer.setCollideWorldBounds(true);
     let localPlayerData = this.getLocalPlayerData();
     this.socket.emit(PLAYER_JOIN_EVENT, localPlayerData);
 
-    // this.camera = new Phaser.Cameras.Scene2D.Camera(0, 0, 640, 360);
+    this.reticle = this.physics.add.sprite(
+      randomSpawnPos.x + 1,
+      randomSpawnPos.y,
+      'reticle');
+    this.reticle.setCollideWorldBounds(true);
+
+    this.cameras.main.zoom = 2;
     this.cameras.main.startFollow(this.localPlayer);
-    this.cameras.main.setSize(1280, 720);
+    this.cameras.main.setBounds(0, 0, config.width, config.height);
 
     this.bullets = this.physics.add.group();
     this.hearts = this.physics.add.group();
@@ -93,26 +100,25 @@ class MpScene extends Phaser.Scene {
       this
     );
 
-    this.upgradeText = this.add.text(
-      config.width / 2,
-      (config.height / 10
-      ) * 9.5,
-      '',
-      {
-        color: '#ffffff',
-        fontSize: 25,
-        whiteSpace: { width: 1000 },
-        fontStyle: 'Bold',
-        align: 'center',
-        backgroundColor: '#000000'
-      }
-    );
-    this.upgradeText.originX = 0.5;
-    this.upgradeText.setScrollFactor(0);
-    this.upgradeText.depth = 99;
+    // Pointer lock will only work after mousedown
+    game.canvas.addEventListener('mousedown', function () {
+      game.input.mouse.requestPointerLock();
+    });
 
-    this.leaderBoard = new LeaderBoard(this);
-    this.gameFeed = new GameFeed(this);
+    // Exit pointer lock when Q or escape (by default) is pressed.
+    this.input.keyboard.on('keydown_Q', function (event) {
+      if (game.input.mouse.locked)
+        game.input.mouse.releasePointerLock();
+    }, 0, this);
+
+    // Move reticle upon locked pointer move
+    this.input.on('pointermove', function (pointer) {
+      if (this.input.mouse.locked) {
+        this.reticle.x += pointer.movementX;
+        this.reticle.y += pointer.movementY;
+      }
+    }, this);
+
   }
 
   keydownCallback (event) {
@@ -143,6 +149,7 @@ class MpScene extends Phaser.Scene {
     this.socket.on(XP_SPAWN_EVENT, this.spawnXpMultiple.bind(this));
     this.socket.on(XP_CONSUME_EVENT, this.removeXp.bind(this));
     this.socket.on(XP_SPAWN_STATIC_EVENT, this.spawnXpStatic.bind(this));
+    this.socket.on(KILL_EVENT, this.killFeedMessage.bind(this));
   }
 
   addPlayer (id, playerData) {
@@ -167,6 +174,8 @@ class MpScene extends Phaser.Scene {
 
     PLAYERS_MAP.set(id, newPlayer);
     newPlayer.setCollideWorldBounds(true);
+
+    this.events.emit(GAME_FEED_MESSAGE_EVENT, getJoinedMessage(newPlayer.name));
   }
 
   updatePlayer (id, playerData) {
@@ -186,8 +195,12 @@ class MpScene extends Phaser.Scene {
 
   playerDisconnect (id) {
     let player = PLAYERS_MAP.get(id);
-    if (player !== undefined)
+    if (player !== undefined) {
       player.destroyWhole();
+      this.events.emit(
+        GAME_FEED_MESSAGE_EVENT,
+        getDisconnectedMessage(player.name));
+    }
   }
 
   playerShoot (id, target) {
@@ -249,7 +262,14 @@ class MpScene extends Phaser.Scene {
     });
   }
 
+  killFeedMessage (message) {
+    this.events.emit(GAME_FEED_MESSAGE_EVENT, message);
+  }
+
   update () {
+
+    console.log(this.localPlayer.x + ' ' + this.localPlayer.y);
+
     if (!this.localPlayer.isDead) {
       // moving
       if (this.keyW.isDown) this.localPlayer.setVelocityY(-this.localPlayer.speed);
@@ -264,18 +284,23 @@ class MpScene extends Phaser.Scene {
       // fire
       if (this.mouse.isDown) {
         this.localPlayer.shoot({
-          x: this.mouse.x + this.cameras.main.scrollX,
-          y: this.mouse.y + this.cameras.main.scrollY
+          x: this.reticle.x,
+          y: this.reticle.y
         });
       }
 
-      // localPlayer will rotate according to mouse
+      // localPlayer will rotate according to reticle
       this.localPlayer.setRotation(
         Phaser.Math.Angle.Between(
           this.localPlayer.x,
           this.localPlayer.y,
-          this.mouse.x + this.cameras.main.scrollX,
-          this.mouse.y + this.cameras.main.scrollY));
+          this.reticle.x,
+          this.reticle.y));
+
+      this.reticle.body.velocity.x = this.localPlayer.body.velocity.x;
+      this.reticle.body.velocity.y = this.localPlayer.body.velocity.y;
+
+      this.constrainReticle();
     } else {
       if (this.keyR.isDown) {
         this.localPlayer.respawn();
@@ -298,9 +323,27 @@ class MpScene extends Phaser.Scene {
     this.socket.emit(
       PLAYER_UPDATE_EVENT,
       localPlayerData);
+  }
 
-    this.leaderBoard.update();
-    this.gameFeed.update();
+  // Ensures reticle does not move offscreen
+  constrainReticle () {
+    let distX = this.reticle.x - this.localPlayer.x; // X distance between player & reticle
+    let distY = this.reticle.y - this.localPlayer.y; // Y distance between player & reticle
+
+    // half of screen, while using zoom 2x
+    let maxXDistance = config.width / 2 / 2;
+    let maxYDistance = config.height / 2 / 2;
+
+    // Ensures reticle cannot be moved offscreen (player follow)
+    if (distX > maxXDistance)
+      this.reticle.x = this.localPlayer.x + maxXDistance;
+    else if (distX < -maxXDistance)
+      this.reticle.x = this.localPlayer.x - maxXDistance;
+
+    if (distY > maxYDistance)
+      this.reticle.y = this.localPlayer.y + maxYDistance;
+    else if (distY < -maxYDistance)
+      this.reticle.y = this.localPlayer.y - maxYDistance;
   }
 
   getLocalPlayerData () {
