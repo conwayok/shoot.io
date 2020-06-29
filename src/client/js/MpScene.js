@@ -27,7 +27,7 @@ class MpScene extends Phaser.Scene {
 
   create () {
 
-    this.names = this.cache.text.get('names').split('\r\n');
+    this.names = this.cache.text.get('names').split(',');
 
     this.socket = io();
 

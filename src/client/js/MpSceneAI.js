@@ -4,7 +4,6 @@ class MpSceneAI extends MpScene {
   }
 
   create () {
-    this.names = this.cache.text.get('names').split('\r\n');
     this.socket = io();
     this.bindEvents();
     let randomSpawnPos = getRandomPos(
