@@ -17,6 +17,8 @@
   <script src="js/Upgrades.js"></script>
   <script src="js/MpScene.js"></script>
   <script src="js/HudScene.js"></script>
+  <script src="js/ControlScene.js"></script>
+  <script src="js/MenuScene.js"></script>
 
 </head>
 <body>
@@ -42,7 +44,7 @@
     render: {
       antialias: false
     },
-    scene: [MpScene, HudScene]
+    scene: [MenuScene, ControlScene, MpScene, HudScene]
   };
   const game = new Phaser.Game(config);
 </script>

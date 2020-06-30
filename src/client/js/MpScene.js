@@ -22,6 +22,8 @@ class MpScene extends Phaser.Scene {
     this.load.image('reticle', assetsPath + 'reticle.png');
     this.load.image('player_dead', assetsPath + 'tank_dead.png');
     this.load.text('names', assetsPath + 'first-names.txt');
+    this.load.audio('shot_sound', assetsPath + 'explosion.mp3');
+
   }
 
   //</editor-fold>
@@ -120,6 +122,7 @@ class MpScene extends Phaser.Scene {
       }
     }, this);
 
+    this.shot_sound = this.sound.add('shot_sound');
   }
 
   keydownCallback (event) {

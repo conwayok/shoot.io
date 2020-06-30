@@ -144,7 +144,7 @@ class LocalPlayer extends Player {
       this.scene.bullets.add(bullet);
       bullet.run();
       this.prevFireTime = Date.now();
-
+      this.scene.shot_sound.play();
       // tell others that i shot
       this.scene.socket.emit(PLAYER_SHOOT_EVENT, target);
     }
@@ -170,6 +170,7 @@ class LocalPlayer extends Player {
     this.speed = 200;
     this.upgradesAvailable = [];
     this.scene.socket.emit(PLAYER_SPAWN_EVENT, { x: randomX, y: randomY });
+    this.scene.socket.emit(PLAYER_UPDATE_EVENT, { scale: this.scale });
   }
 
   checkLevelUp () {
@@ -329,7 +330,13 @@ class LocalAIPlayer extends LocalPlayer {
       Phaser.Math.Angle.Between(this.x, this.y,
         target.x, target.y
       ));
-    super.shoot(target);
+    if (this.getNextAvailableFireTime() <= Date.now()) {
+      let bullet = super.createBullet(target);
+      bullet.run();
+      this.prevFireTime = Date.now();
+      // tell others that i shot
+      this.scene.socket.emit(PLAYER_SHOOT_EVENT, target);
+    }
   }
 
   update () {
