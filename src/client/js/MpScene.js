@@ -23,7 +23,7 @@ class MpScene extends Phaser.Scene {
     this.load.image('player_dead', assetsPath + 'tank_dead.png');
     this.load.text('names', assetsPath + 'first-names.txt');
     this.load.audio('shot_sound', assetsPath + 'explosion.mp3');
-
+    this.load.audio('death_explosion', assetsPath + 'death_explosion.mp3');
   }
 
   //</editor-fold>
@@ -123,6 +123,7 @@ class MpScene extends Phaser.Scene {
     }, this);
 
     this.shot_sound = this.sound.add('shot_sound');
+    this.death_explosion = this.sound.add('death_explosion');
   }
 
   keydownCallback (event) {

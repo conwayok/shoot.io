@@ -208,6 +208,9 @@ class LocalPlayer extends Player {
       this.scene.xpOverlap.active = false;
       this.scene.heartOverlap.active = false;
 
+      if (this.scene.hasOwnProperty('death_explosion'))
+        this.scene.death_explosion.play();
+
       // if i died, i will tell server
       this.scene.socket.emit(PLAYER_DIE_EVENT);
     }
@@ -218,6 +221,12 @@ class LocalPlayer extends Player {
 class RemotePlayer extends Player {
   constructor (scene, spawnX, spawnY, texture, nameStr) {
     super(scene, spawnX, spawnY, texture, nameStr);
+  }
+
+  die () {
+    super.die();
+    if (this.scene.hasOwnProperty('death_explosion'))
+      this.scene.death_explosion.play();
   }
 
   destroyWhole () {
@@ -358,7 +367,7 @@ class LocalAIPlayer extends LocalPlayer {
         super.levelUp(getRandomInt(1, 4));
       }
     } else if ((Date.now() - this.deathTime
-    ) > 3000) {
+    ) > 1000) {
       super.respawn();
     }
   }
