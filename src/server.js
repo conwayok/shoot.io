@@ -74,8 +74,9 @@ io.on('connection', function (socket) {
       socket.broadcast.emit(PLAYER_JOIN_EVENT, uid, player);
 
     } else {
-      // start random heart spawning
+      // start random  spawning
       startSpawnHeart();
+      startSpawnXp();
     }
 
     PLAYERS[uid] = player;
@@ -164,16 +165,18 @@ function resetServer () {
   console.log('resetServer ' + Date.now());
   // if no players left, clear game state
   clearInterval(spawnHeartInterval);
+  clearInterval(spawnXpInterval);
   PLAYERS = {};
   HEARTS = {};
   XPS = {};
 }
 
 let spawnHeartInterval = null;
+let spawnXpInterval = null;
 
 function startSpawnHeart () {
   console.log('startSpawnHeart');
-  spawnHeartInterval = setInterval(spawnHeart, 6000);
+  spawnHeartInterval = setInterval(spawnHeart, 3000);
 }
 
 function spawnHeart () {
@@ -189,11 +192,30 @@ function spawnHeart () {
   io.sockets.emit(HEART_SPAWN_EVENT, id, spawnPos);
 }
 
+function startSpawnXp () {
+  console.log('startSpawnXp');
+  spawnXpInterval = setInterval(spawnXpStatic, 3000);
+}
+
+function spawnXpStatic () {
+  let spawnPos = getRandomPos(
+    50,
+    50,
+    MAP_WIDTH - 50,
+    MAP_HEIGHT - 50
+  );
+  let id = getRandomId();
+  console.log('spawnXpStatic ' + id + ' ' + JSON.stringify(spawnPos));
+  XPS[id] = { stopX: spawnPos.x, stopY: spawnPos.y };
+  let xp = [{ id: id, x: spawnPos.x, y: spawnPos.y }];
+  io.sockets.emit(XP_SPAWN_STATIC_EVENT, xp);
+}
+
 function spawnXp (spawnX, spawnY, amount) {
   let xps = {};
   for (let i = 0; i < amount; ++i) {
     let xpId = getRandomId();
-    let randomFlyTarget = getRandomPos(0, 0, 1280, 720);
+    let randomFlyTarget = getRandomPos(0, 0, 2560, 1440);
     let xpData = {
       x: spawnX,
       y: spawnY,
