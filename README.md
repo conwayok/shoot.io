@@ -2,6 +2,9 @@
 
 **1082 元智大學 遊戲程式設計**
 
+![image](https://i.imgur.com/5cvEQJX.jpeg)
+
+
 執行方法：
 
 1. 安裝[Node.js 10+](https://nodejs.org/dist/latest-v10.x/)
